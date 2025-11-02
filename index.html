@@ -560,7 +560,7 @@
                 if (new Date(endDate) < new Date(startDate)) { throw new Error("End date cannot be before the start date."); }
                 
                 const tripLength = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
-                const schema = { type: "OBJECT", properties: { "days": { type: "ARRAY", items: { type: "OBJECT", properties: { "day": { type: "NUMBER" }, "title": { type: "STRING" }, "events": { type: "ARRAY", items: { type: "OBJECT", properties: { "time": { type: "STRING" }, "title": { type: "STRING" }, "locationName": { type: "STRING" }, "description": { type: "STRING" }, "cost": { type: "NUMBER" }, "icon": { type: "STRING" }, "latitude": { type: "NUMBER" }, "longitude": { type: "NUMBER" } }, required: ["time", "title", "locationName", "description", "cost", "icon", "latitude", "longitude"] } } }, required: ["day", "title", "events"] } }, "hotelRecommendations": { type: "ARRAY", items: { type: "OBJECT", properties: { "name": { "type": "STRING" }, "style": { "type": "STRING" }, "estimatedPricePerNight": { "type": "NUMBER" }, "description": { "type": "STRING" }, "latitude": { type: "NUMBER" }, "longitude": { "type": "NUMBER" } }, required: ["name", "style", "estimatedPricePerNight", "description", "latitude", "longitude"] } }, "restaurantRecommendations": { type: "ARRAY", items: { type: "OBJECT", properties: { "name": { "type": "STRING" }, "cuisine": { "type": "STRING" }, "estimatedPricePerPerson": { "type": "NUMBER" }, "description": { "type": "STRING" }, "latitude": { "type": "NUMBER" }, "longitude": { "type": "NUMBER" } }, required: ["name", "cuisine", "estimatedPricePerPerson", "description", "latitude", "longitude"] } }, "budgetBreakdown": { type: "OBJECT", properties: { "accommodation": { "type": "NUMBER" }, "food": { "type": "NUMBER" }, "activities": { "type": "NUMBER" }, "localTravel": { "type": "NUMBER" }, "miscellaneous": { "type": "NUMBER" } }, required: ["accommodation", "food", "activities", "localTravel", "miscellaneous"] } }, required: ["days", "hotelRecommendations", "restaurantRecommendations", "budgetBreakdown"] };
+                const schema = { type: "OBJECT", properties: { "days": { type: "ARRAY", items: { type: "OBJECT", properties: { "day": { type: "NUMBER" }, "title": { type: "STRING" }, "events": { type: "ARRAY", items: { type: "OBJECT", properties: { "time": { type: "STRING" }, "title": { type: "STRING" }, "locationName": { type: "STRING" }, "description": { type: "STRING" }, "cost": { type: "NUMBER" }, "icon": { type: "STRING" }, "latitude": { type: "NUMBER" }, "longitude": { type: "NUMBER" } }, required: ["time", "title", "locationName", "description", "cost", "icon", "latitude", "longitude"] } } }, required: ["day", "title", "events"] } }, "hotelRecommendations": { type: "ARRAY", items: { type: "OBJECT", properties: { "name": { "type": "STRING" }, "style": { "type": "STRING" }, "estimatedPricePerNight": { "type": "NUMBER" }, "description": { "type": "STRING" }, "latitude": { type: "NUMBER" }, "longitude": { "type": "NUMBER" } }, required: ["name", "style", "estimatedPricePerNight", "description", "latitude", "longitude"] } }, "restaurantRecommendations": { type: "ARRAY", items: { type: "OBJECT", properties: { "name": { "type": "STRING" }, "cuisine": { "type": "STRING" }, "estimatedPricePerPerson": { "type": "NUMBER" }, "description": { "type": "STRING" }, "latitude": { type: "NUMBER" }, "longitude": { "type": "NUMBER" } }, required: ["name", "cuisine", "estimatedPricePerPerson", "description", "latitude", "longitude"] } }, "budgetBreakdown": { type: "OBJECT", properties: { "accommodation": { "type": "NUMBER" }, "food": { "type": "NUMBER" }, "activities": { "type": "NUMBER" }, "localTravel": { "type": "NUMBER" }, "miscellaneous": { "type": "NUMBER" } }, required: ["accommodation", "food", "activities", "localTravel", "miscellaneous"] } }, required: ["days", "hotelRecommendations", "restaurantRecommendations", "budgetBreakdown"] };
                 const validIcons = ["map-pin", "camera", "soup", "leaf", "shopping-cart", "trees", "beer", "gamepad-2", "heart", "gem", "bar-chart-2", "plane", "bus", "train", "utensils-crossed", "landmark", "mountain", "palace", "ticket", "log-in", "bed-double"];
                 const systemPrompt = `You are an expert Travel Planner. Your task is to create a budget-friendly and logically sequenced itinerary based on user inputs, adhering strictly to the JSON schema. Key Constraints: 1.  **Strict Budget Adherence:** The sum of 'accommodation', 'food', 'activities', and 'localTravel' in the 'budgetBreakdown' MUST be less than or equal to the user's total budget. 'miscellaneous' is the remaining buffer. The sum of all five breakdown categories MUST precisely equal the total budget. 2.  **Geographical Optimization:** For each day, the 'events' MUST be ordered in a geographically logical sequence to create a sensible route that minimizes travel time and cost. 3.  **Realistic Planning:** Create a balanced plan that utilizes a significant portion of the budget for a good experience. Estimate a daily cost for local transport (metros, buses, etc.) and include the total in 'localTravel'. 4.  **Complete Data:** For every event and recommendation, you MUST provide a specific location name and its precise, real-world latitude and longitude coordinates. 5.  **Icon Selection:** For each daily event, choose the most appropriate icon from this list: ${validIcons.join(', ')}.`;
                 const userQuery = `Generate a ${tripLength}-day travel itinerary for a trip to ${destination}. \n- Travelers: ${travelers} \n- Total Budget: ₹${budget} INR \n- Start Date: ${new Date(startDate).toDateString()} \n- End Date: ${new Date(endDate).toDateString()}. \nFocus on famous, iconic, and must-visit locations suitable for a student traveler. Include cultural sites, landmarks, and fun activities. Provide 3 budget-friendly hotel/hostel recommendations and 4 diverse, affordable food recommendations.`;
@@ -884,87 +884,65 @@
                 document.getElementById('travelFrom').focus();
             }
 
-          async function handleTravelCostEstimation(e) {
-    e.preventDefault();
-    const travelFrom = document.getElementById('travelFrom').value.trim();
-    if (!travelFrom) { /* ... show error ... */ return; }
-
-    // ... shows loading spinner ...
-    const submitBtn = travelCostForm.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-
-    try {
-        // 1. Get the destination from your current itinerary
-        const destination = currentItineraryData.details.destination;
-
-        // 2. Call your NEW serverless function
-        const response = await fetch('/.netlify/functions/get-travel-costs', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ from: travelFrom, to: destination })
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to get travel costs.');
-        }
-
-        const costs = await response.json(); 
-        // (e.g., costs = { flight: 8500, train: 1200, bus: 950 })
-
-        // 3. Display the REAL data
-        travelCostResult.innerHTML = `
-            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                <h4 class="font-bold text-slate-800 mb-2">Travel Cost from ${travelFrom}</h4>
-                <div class="space-y-2 text-sm">
-                    <div class="flex justify-between"><span>Flight (round trip):</span><span class="font-semibold">₹${costs.flight || 'N/A'}</span></div>
-                    <div class="flex justify-between"><span>Train (round trip):</span><span class="font-semibold">₹${costs.train || 'N/A'}</span></div>
-                    <div class="flex justify-between"><span>Bus (round trip):</span><span class="font-semibold">₹${costs.bus || 'N/A'}</span></div>
-                </div>
-                <p class="text-xs text-slate-500 mt-3">Real-time estimates. Prices may vary.</p>
-            </div>`;
-        
-        closeModal(travelCostModal);
-
-    } catch (error) {
-        console.error("Error getting travel costs:", error);
-        // Show an error in the modal instead of closing it
-        showToast("Could not get travel costs. Please try again.");
-    } finally {
-        // ... hides loading spinner ...
-        submitBtn.disabled = false;
-    }
-}
+            // *** THIS IS THE CORRECT, UPDATED FUNCTION ***
+            async function handleTravelCostEstimation(e) {
                 e.preventDefault();
                 const travelFrom = document.getElementById('travelFrom').value.trim();
-                if (!travelFrom) { showToast("Please enter your starting location."); return; }
-                if (!currentItineraryData?.days[0]?.events[0]) { showToast("Destination location not available."); return; }
+
+                if (!travelFrom) {
+                    showToast("Please enter your starting location.");
+                    return;
+                }
+
+                if (!currentItineraryData?.details?.destination) {
+                    showToast("Destination location not available.");
+                    return;
+                }
+
                 const submitBtn = travelCostForm.querySelector('button[type="submit"]');
                 const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mx-auto"></div>';
                 submitBtn.disabled = true;
-                setTimeout(() => {
-                    const { latitude: destLat, longitude: destLon } = currentItineraryData.days[0].events[0];
-                    const startLat = destLat + (Math.random() * 10 - 5);
-                    const startLon = destLon + (Math.random() * 10 - 5);
-                    const distance = getHaversineDistance(startLat, startLon, destLat, destLon);
-                    const flightCost = Math.max(2000, distance * 8);
-                    const trainCost = Math.max(500, distance * 2);
-                    const busCost = Math.max(300, distance * 1.5);
-                    travelCostResult.innerHTML = `<div class="bg-slate-50 p-4 rounded-lg border border-slate-200"><h4 class="font-bold text-slate-800 mb-2">Travel Cost from ${travelFrom}</h4><div class="space-y-2 text-sm"><div class="flex justify-between"><span>Flight (round trip):</span><span class="font-semibold">₹${flightCost.toFixed(0)}</span></div><div class="flex justify-between"><span>Train (round trip):</span><span class="font-semibold">₹${trainCost.toFixed(0)}</span></div><div class="flex justify-between"><span>Bus (round trip):</span><span class="font-semibold">₹${busCost.toFixed(0)}</span></div></div><p class="text-xs text-slate-500 mt-3">Based on approximate distance of ${distance.toFixed(0)} km. Prices are estimates for planning purposes.</p></div>`;
+
+                try {
+                    const destination = currentItineraryData.details.destination;
+
+                    // Call your new Netlify serverless function
+                    const response = await fetch('/.netlify/functions/get-travel-costs', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ from: travelFrom, to: destination })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch travel costs from server.');
+                    }
+
+                    const costs = await response.json(); // Get the JSON from your new function
+
+                    // Display the new data from your function
+                    travelCostResult.innerHTML = `
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <h4 class="font-bold text-slate-800 mb-2">Travel Cost from ${costs.from}</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between"><span>Flight (round trip):</span><span class="font-semibold">₹${costs.flight.toFixed(0)}</span></div>
+                                <div class="flex justify-between"><span>Train (round trip):</span><span class="font-semibold">₹${costs.train.toFixed(0)}</span></div>
+                                <div class="flex justify-between"><span>Bus (round trip):</span><span class="font-semibold">₹${costs.bus.toFixed(0)}</span></div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-3">Based on approximate distance of ${costs.distance} km. Prices are estimates for planning purposes.</p>
+                        </div>`;
+
+                    closeModal(travelCostModal);
+
+                } catch (error) {
+                    console.error("Error fetching travel costs:", error);
+                    showToast("Could not get travel costs. Please try again.");
+                } finally {
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
-                    closeModal(travelCostModal);
-                }, 1500);
+                }
             }
-
-            function getHaversineDistance(lat1, lon1, lat2, lon2) {
-                const R = 6371;
-                const dLat = (lat2 - lat1) * Math.PI / 180;
-                const dLon = (lon2 - lon1) * Math.PI / 180;
-                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                return R * c;
-            }
+            // *** END OF CORRECTED FUNCTION ***
 
             startPlanningBtn.addEventListener('click', () => {
                 if (auth.getCurrentUser()) {
@@ -1060,9 +1038,9 @@
                     endDateInput.setAttribute('min', e.target.value);
                 });
             }
+        }
         
-        
-        initializeAppLogic();
-    </script>
+            initializeAppLogic();
+        </script>
 </body>
 </html>
