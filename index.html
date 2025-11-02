@@ -884,7 +884,56 @@
                 document.getElementById('travelFrom').focus();
             }
 
-            function handleTravelCostEstimation(e) {
+          async function handleTravelCostEstimation(e) {
+    e.preventDefault();
+    const travelFrom = document.getElementById('travelFrom').value.trim();
+    if (!travelFrom) { /* ... show error ... */ return; }
+
+    // ... shows loading spinner ...
+    const submitBtn = travelCostForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+
+    try {
+        // 1. Get the destination from your current itinerary
+        const destination = currentItineraryData.details.destination;
+
+        // 2. Call your NEW serverless function
+        const response = await fetch('/.netlify/functions/get-travel-costs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ from: travelFrom, to: destination })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to get travel costs.');
+        }
+
+        const costs = await response.json(); 
+        // (e.g., costs = { flight: 8500, train: 1200, bus: 950 })
+
+        // 3. Display the REAL data
+        travelCostResult.innerHTML = `
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <h4 class="font-bold text-slate-800 mb-2">Travel Cost from ${travelFrom}</h4>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between"><span>Flight (round trip):</span><span class="font-semibold">₹${costs.flight || 'N/A'}</span></div>
+                    <div class="flex justify-between"><span>Train (round trip):</span><span class="font-semibold">₹${costs.train || 'N/A'}</span></div>
+                    <div class="flex justify-between"><span>Bus (round trip):</span><span class="font-semibold">₹${costs.bus || 'N/A'}</span></div>
+                </div>
+                <p class="text-xs text-slate-500 mt-3">Real-time estimates. Prices may vary.</p>
+            </div>`;
+        
+        closeModal(travelCostModal);
+
+    } catch (error) {
+        console.error("Error getting travel costs:", error);
+        // Show an error in the modal instead of closing it
+        showToast("Could not get travel costs. Please try again.");
+    } finally {
+        // ... hides loading spinner ...
+        submitBtn.disabled = false;
+    }
+}
                 e.preventDefault();
                 const travelFrom = document.getElementById('travelFrom').value.trim();
                 if (!travelFrom) { showToast("Please enter your starting location."); return; }
@@ -1012,7 +1061,7 @@
                 });
             }
         
-        }
+        
         initializeAppLogic();
     </script>
 </body>
