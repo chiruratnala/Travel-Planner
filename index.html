@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Travel Planner</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2306b6d4%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><circle cx=%2212%22 cy=%2212%22 r=%2210%22/><polygon points=%2216.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76%22 fill=%22%2306b6d4%22/></svg>">        
-    <meta name="google-signin-client_id" content="945126500147-nj621u8rpo487apfp39m4hq7olau2j8g.apps.googleusercontent.com">
+    <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID_HERE">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -372,7 +372,6 @@
             </div>
         </div>
 
-        <!-- New Travel Cost Modal -->
         <div id="travelCostModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 modal-backdrop opacity-0">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] flex flex-col modal-content scale-95 opacity-0">
                 <div class="flex justify-between items-center p-4 border-b border-slate-200">
@@ -569,9 +568,15 @@
                 const budget = document.getElementById('budget').value;
                 
                 if (!destination || !startDate || !endDate || !travelers || !budget) { throw new Error("Please fill out all the trip details before generating."); }
-                if (new Date(endDate) < new Date(startDate)) { throw new Error("End date cannot be before the start date."); }
                 
-                               const tripLength = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
+                // Fix timezone issue by using date differences correctly
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                if (end < start) { throw new Error("End date cannot be before the start date."); }
+                
+                const diffTime = Math.abs(end - start);
+                const tripLength = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
                 const schema = { type: "OBJECT", properties: { "days": { type: "ARRAY", items: { type: "OBJECT", properties: { "day": { type: "NUMBER" }, "title": { type: "STRING" }, "events": { type: "ARRAY", items: { type: "OBJECT", properties: { "time": { type: "STRING" }, "title": { type: "STRING" }, "locationName": { type: "STRING" }, "description": { type: "STRING" }, "cost": { type: "NUMBER" }, "icon": { type: "STRING" }, "latitude": { type: "NUMBER" }, "longitude": { type: "NUMBER" } }, required: ["time", "title", "locationName", "description", "cost", "icon", "latitude", "longitude"] } } }, required: ["day", "title", "events"] } }, "hotelRecommendations": { type: "ARRAY", items: { type: "OBJECT", properties: { "name": { "type": "STRING" }, "style": { "type": "STRING" }, "estimatedPricePerNight": { "type": "NUMBER" }, "description": { "type": "STRING" }, "latitude": { "type": "NUMBER" }, "longitude": { "type": "NUMBER" } }, required: ["name", "style", "estimatedPricePerNight", "description", "latitude", "longitude"] } }, "restaurantRecommendations": { type: "ARRAY", items: { type: "OBJECT", properties: { "name": { "type": "STRING" }, "cuisine": { "type": "STRING" }, "estimatedPricePerPerson": { "type": "NUMBER" }, "description": { "type": "STRING" }, "latitude": { "type": "NUMBER" }, "longitude": { "type": "NUMBER" } }, required: ["name", "cuisine", "estimatedPricePerPerson", "description", "latitude", "longitude"] } }, "budgetBreakdown": { type: "OBJECT", properties: { "accommodation": { "type": "NUMBER" }, "food": { "type": "NUMBER" }, "activities": { "type": "NUMBER" }, "localTravel": { "type": "NUMBER" }, "miscellaneous": { "type": "NUMBER" } }, required: ["accommodation", "food", "activities", "localTravel", "miscellaneous"] } }, required: ["days", "hotelRecommendations", "restaurantRecommendations", "budgetBreakdown"] };
                 const validIcons = ["map-pin", "camera", "soup", "leaf", "shopping-cart", "trees", "beer", "gamepad-2", "heart", "gem", "bar-chart-2", "plane", "bus", "train", "utensils-crossed", "landmark", "mountain", "palace", "ticket", "log-in", "bed-double"];
                 const systemPrompt = `You are an expert Travel Planner. Your task is to create a budget-friendly and logically sequenced itinerary based on user inputs, adhering strictly to the JSON schema.
@@ -586,12 +591,13 @@ Key Constraints:
             }
             
            async function callGenerativeAPI(userQuery, systemPrompt, schema) {
+                // REPLACE WITH YOUR GEMINI API KEY
                 const apiKey = "AIzaSyAIDmkiNf9J5lHgjmoKjNnfGnUz-d2lHfc";
                 
-                // 1. Correct URL for the flash model
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                // 1. FIXED URL: Ensure no spaces or typos in the model name
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
-                // 2. Define the payload (This is what was missing)
+                // 2. DEFINED PAYLOAD: This fixes the "payload is not defined" error
                 const payload = {
                     contents: [{
                         parts: [{
@@ -615,7 +621,7 @@ Key Constraints:
 
                 for (let i = 0; i < retries; i++) {
                     try {
-                        // 3. Send the request with the payload
+                        // 3. SEND REQUEST
                         response = await fetch(apiUrl, { 
                             method: 'POST', 
                             headers: { 'Content-Type': 'application/json' }, 
@@ -624,8 +630,10 @@ Key Constraints:
 
                         if (response.ok) {
                             const result = await response.json(); 
-                            const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                            let jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
                             if (jsonText) { 
+                                // Clean up potential Markdown wrappers
+                                jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
                                 return JSON.parse(jsonText); 
                             } else { 
                                 throw new Error("API returned an empty or invalid response."); 
@@ -670,8 +678,11 @@ Key Constraints:
                     budget: document.getElementById('budget').value,
                 };
                 currentItineraryData = { ...itineraryData, details };
-                const startDate = new Date(details.startDate);
-                const endDate = new Date(details.endDate);
+                
+                // Use explicit string parsing to avoid timezone shift
+                const startDate = new Date(details.startDate + "T00:00:00");
+                const endDate = new Date(details.endDate + "T00:00:00");
+                
                 const destination = details.destination.split(',')[0];
                 const formatDate = (date) => new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
                 
@@ -783,12 +794,13 @@ Key Constraints:
             function setupMap(itineraryData) {
                 if (map) { map.remove(); map = null; }
                 markers = {};
-                const geoapifyApiKey = "5ca709090953414b81a9fcc9fb05de70";
+                const geoapifyApiKey = "5ca709090953414b81a9fcc9fb05de70"; // Geoapify free tile key
                 const allPoints = [];
                 itineraryData.days.forEach(day => day.events.forEach(event => allPoints.push({ lat: event.latitude, lon: event.longitude, title: event.title, desc: `Day ${day.day}: ${event.time}` })));
                 (itineraryData.hotelRecommendations || []).forEach(h => allPoints.push({ lat: h.latitude, lon: h.longitude, title: h.name, desc: 'Accommodation' }));
                 (itineraryData.restaurantRecommendations || []).forEach(r => allPoints.push({ lat: r.latitude, lon: r.longitude, title: r.name, desc: 'Restaurant' }));
                 if (allPoints.length === 0) { document.getElementById('map').innerHTML = `<div class="h-full w-full flex items-center justify-center text-slate-500">No locations to display</div>`; return; }
+                
                 map = L.map('map').setView([allPoints[0].lat, allPoints[0].lon], 13);
                 L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${geoapifyApiKey}`, { attribution: 'Powered by <a href="https://www.geoapify.com/" target="_blank">Geoapify</a>', maxZoom: 20, id: 'osm-bright' }).addTo(map);
                 const markerGroup = L.featureGroup();
@@ -1018,8 +1030,6 @@ Key Constraints:
                 submitBtn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mx-auto"></div>';
                 submitBtn.disabled = true;
 
-                // In a real implementation, you would call an API to get coordinates for the starting location
-                // For this demo, we'll simulate the process
                 setTimeout(() => {
                     const destLat = currentItineraryData.days[0].events[0].latitude;
                     const destLon = currentItineraryData.days[0].events[0].longitude;
@@ -1128,7 +1138,6 @@ Key Constraints:
                 [...container.querySelectorAll('.draggable')].forEach(el => el.classList.remove('drag-over'));
                 
                 if (afterElement == null) {
-                    // No specific style needed for dropping at the end
                 } else {
                     afterElement.classList.add('drag-over');
                 }
@@ -1239,11 +1248,11 @@ Key Constraints:
 
                 startDateInput.addEventListener('change', (e) => {
                     if (e.target.value) {
-                        const nextDay = new Date(e.target.value);
-                                                nextDay.setDate(nextDay.getDate() + 1);
-                        const nextDayStr = nextDay.toISOString().split('T')[0];
-                        endDateInput.value = ''; // Clear end date if start date changes
-                        endDateInput.setAttribute('min', nextDayStr);
+                         const nextDay = new Date(e.target.value);
+                         nextDay.setDate(nextDay.getDate() + 1);
+                         const nextDayStr = nextDay.toISOString().split('T')[0];
+                         endDateInput.value = ''; // Clear end date if start date changes
+                         endDateInput.setAttribute('min', nextDayStr);
                     } else {
                         endDateInput.removeAttribute('min');
                     }
