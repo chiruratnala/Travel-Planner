@@ -88,7 +88,8 @@ Follow these instructions to set up the project locally.
 
 ## 📸 Screenshots
 
-*(You can upload screenshots of your app here later)*
+![Uploading travel-plannerai.netlify.app_ (1).png…]()
+
 
 ## 🤝 Contributing
 
