@@ -2,12 +2,12 @@
 
 **Travel Planner AI** is an intelligent web application that generates personalized travel itineraries in seconds using Google's Gemini AI. It allows users to login securely, plan trips based on interests, and save their favorite journeys to the cloud.
 
-![Project Banner](https://i.ibb.co/VYjzxGtg/Screenshot-378.png)
+![Project Banner](https://i.ibb.co/VYjzxGtg/Screenshot-378.png)(https://travel-plannerai.netlify.app/)
 
 ## 🌟 Features
 
 * **AI-Powered Itineraries:** Generates day-by-day travel plans including timing, locations, and descriptions using Google Gemini models.
-* **Smart Customization:** Tailors trips based on destination, duration (1-14 days), and specific interests (e.g., Food, History, Adventure).
+* **Smart Customization:** Tailors trips based on destination, duration and specific interests (e.g., Food, History, Adventure).
 * **Authentication:**
     * 🔵 **Google Sign-In:** One-click secure login.
 * **Cloud Sync:** Automatically saves and retrieves trip history using Firebase Realtime Database.
@@ -89,8 +89,9 @@ Follow these instructions to set up the project locally.
 ## 📸 Screenshots
 ## Example itinerary
 
-<img width="1978" height="8612" alt="travel-plannerai netlify app_ (1)" src="https://github.com/user-attachments/assets/2c14b535-f258-4ccf-8c49-1c4a4feedd24" />
 
+<img width="1978" height="1232" alt="travel-plannerai netlify app_ (2)" src="https://github.com/user-attachments/assets/bf661c2e-277e-4df8-a96d-0cef263d3032" />
+<img width="1978" height="6982" alt="travel-plannerai netlify app_" src="https://github.com/user-attachments/assets/d68443f1-ac53-4be9-b6d4-16ddfafaa8d6" />
 
 
 ## 🤝 Contributing
