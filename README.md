@@ -87,8 +87,10 @@ Follow these instructions to set up the project locally.
 * **Security:** Restrict your API key in Google Cloud Console to your specific domains (`localhost`, `your-netlify-app.app`) to prevent unauthorized use.
 
 ## 📸 Screenshots
+## Example itinerary
 
-![Uploading travel-plannerai.netlify.app_ (1).png…]()
+<img width="1978" height="8612" alt="travel-plannerai netlify app_ (1)" src="https://github.com/user-attachments/assets/2c14b535-f258-4ccf-8c49-1c4a4feedd24" />
+
 
 
 ## 🤝 Contributing
