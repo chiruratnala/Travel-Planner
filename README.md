@@ -1,16 +1,15 @@
-# ✈️ Wanderlust AI - Smart Travel Planner
+# ✈️ Travel Planner AI - Smart Travel Planner
 
-**Wanderlust AI** is an intelligent web application that generates personalized travel itineraries in seconds using Google's Gemini AI. It allows users to login securely, plan trips based on interests, and save their favorite journeys to the cloud.
+**Travel Planner AI** is an intelligent web application that generates personalized travel itineraries in seconds using Google's Gemini AI. It allows users to login securely, plan trips based on interests, and save their favorite journeys to the cloud.
 
-![Project Banner](https://img.shields.io/badge/Travel-AI_Powered-emerald?style=for-the-badge&logo=google-earth)
+![Project Banner](https://i.ibb.co/VYjzxGtg/Screenshot-378.png)
 
 ## 🌟 Features
 
 * **AI-Powered Itineraries:** Generates day-by-day travel plans including timing, locations, and descriptions using Google Gemini models.
 * **Smart Customization:** Tailors trips based on destination, duration (1-14 days), and specific interests (e.g., Food, History, Adventure).
-* **Dual Authentication:**
+* **Authentication:**
     * 🔵 **Google Sign-In:** One-click secure login.
-    * 📱 **Mobile OTP Login:** Secure phone authentication via SMS.
 * **Cloud Sync:** Automatically saves and retrieves trip history using Firebase Realtime Database.
 * **Hotel Recommendations:** Options to include or exclude stay suggestions.
 * **Interactive UI:** Fully responsive design built with Tailwind CSS, featuring loading animations and clean typography.
@@ -22,7 +21,7 @@
 * **Styling:** Tailwind CSS (via CDN), Material Icons, Lucide Icons
 * **AI Engine:** Google Gemini API (gemini-1.5-flash)
 * **Backend & Auth:** Google Firebase (Authentication & Realtime Database)
-* **Hosting:** Netlify (or GitHub Pages)
+* **Hosting:** Netlify 
 
 ## 🚀 Getting Started
 
@@ -37,7 +36,7 @@ Follow these instructions to set up the project locally.
 
 1.  **Clone the repository** (or download files):
     ```bash
-    git clone [https://github.com/yourusername/wanderlust-ai.git](https://github.com/yourusername/wanderlust-ai.git)
+    git clone [https://github.com/chiruratnala/Travel-Planner.git]
     ```
 
 2.  **Open the project folder** in VS Code.
