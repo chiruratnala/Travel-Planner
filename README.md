@@ -2,7 +2,9 @@
 
 **Travel Planner AI** is an intelligent web application that generates personalized travel itineraries in seconds using Google's Gemini AI. It allows users to login securely, plan trips based on interests, and save their favorite journeys to the cloud.
 
-![Project Banner](https://i.ibb.co/VYjzxGtg/Screenshot-378.png)(https://travel-plannerai.netlify.app/)
+<img width="1365" height="745" alt="Screenshot (400)" src="https://github.com/user-attachments/assets/8b232c44-6986-4c11-92a2-b01c35646f1c" />
+
+https://travel-plannerai.netlify.app/
 
 ## 🌟 Features
 
